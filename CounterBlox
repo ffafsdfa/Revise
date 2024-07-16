@@ -16,23 +16,6 @@ function create_connection(script_signal, callback)
     return proxy
 end
 
--- player list shet
-function get_players()
-    local players = {}
-    for i,v in pairs(game.Players:GetChildren()) do
-        if v == game.Players.LocalPlayer then continue end
-        table.insert(players, v)
-    end
-    return players
-end
-
-local function teleport(goal)
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players[goal].Character.HumanoidRootPart.CFrame
-end
-
-getgenv().Selected_Player = nil
---// //--
-
 local config = {
     enabled = false,
     --
@@ -90,48 +73,6 @@ getgenv().Shiroku_Rewrite = {
         VisibleCheck = false,
         FriendCheck = false
     },
-    ['Panic'] = {
-        Enabled = false, -- // Unloads the script completly
-        Keybind = Enum.KeyCode.N
-    },
-    ['Silent'] = {
-        Enabled = false,
-        Vel_Type = "Velocity",
-        SpamGuns = false,
-        Mode = 'FOV', -- // FOV or Target
-        EnableKeybind = false,
-        Keybind = 'j',
-        Notification = false,
-        Prediction = {
-            UsePrediction = false,
-            Prediction_X = 0.129331234,
-            Prediction_Y = 0.129331234,
-            AutoPrediction = false,
-        },
-        HitPart = 'HumanoidRootPart',
-        HitPart_Mode = 'Custom', -- // 'Nearest Point', 'Nearest Part', 'Custom'
-        HitChance = 100,
-        Resolver = {
-            Enabled = false,
-            Method = 'Recalculate Velocity'
-        },
-        Anti_Curve = {
-            Enabled = false,
-            LookAt = false,
-            CheckIfStanding = false
-        },
-        Checks = {
-            KnockedCheck = false,
-            GrabbedCheck = false,
-            VehicleCheck = false,
-            WallCheck = false,
-            CrewCheck = false,
-            ForceFieldCheck = false,
-            FriendCheck = false,
-            HeldToolCheck = false,
-            NoGroundShots = false
-        },
-    },
     ['Aim Assist'] = {
         Enabled = false,
         Vel_Type = "Velocity",
@@ -179,14 +120,6 @@ getgenv().Shiroku_Rewrite = {
         },
     },
     ['Fov'] = {
-        Silent = {
-            Visible = false,
-            Radius = 150,
-            Color = Color3.fromRGB(189, 172, 255),
-            Thickness = 1,
-            Transparency = 0.75,
-            Filled = false,
-        },
         AimAssist = {
             Visible = false,
             Radius = 150,
@@ -197,20 +130,6 @@ getgenv().Shiroku_Rewrite = {
         },
     },
     ['Visualize'] = {
-        Silent = {
-            Tracer = {
-                Enabled = false,
-                Color = Color3.fromRGB(189, 172, 255),
-                Thickness = 1
-            },
-            Highlight = {
-                Enabled = false,
-                FillColor = Color3.fromRGB(189, 172, 255),
-                OutlineColor = Color3.fromRGB(170, 152, 215),
-                FillTransparency = 0.4,
-                OutlineTransparency = 0.2
-            },
-        },
         AimAssist = {
             Highlight = {
                 Enabled = false,
@@ -230,26 +149,6 @@ getgenv().Shiroku_Rewrite = {
                 Radius = 5,
                 Sides = 1.5
             },
-        },
-    },
-    ['Panel'] = {
-        Enabled = false,
-        Position = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2 - 500, workspace.CurrentCamera.ViewportSize.Y / 2 + 100),
-    },
-    ['Misc'] = {
-        Auto360 = {
-            Enabled = true,
-            Keybind = 'v',
-            Speed = math.pi / 0.165
-        },
-        InventorySorting = {
-            Enabled = false,
-            Keybind = 'n',
-            FirstSlot = '[Double-Barrel SG]',
-            SecondSlot = '[Revolver]',
-            ThirdSlot = '[TacticalShotgun]',
-            FourthSlot = '[Shotgun]',
-            FifthSlot = '[Katana]',
         },
     },
 }
@@ -289,10 +188,6 @@ local aimassist_target = nil
 local aimassist_targetting = nil
 local aimassist_pos = nil
 local hitscanpart_cam = nil
---
-local silent_target = nil
-local silenttarget_pos = nil
-local hitscanpart_silent = nil
 
 function UtilityStorage:create_drawing(drawing_class, drawing_properties)
     local drawing = Drawing.new(drawing_class)
@@ -462,57 +357,6 @@ function UtilityStorage:get_target()
     return Player
 end
 
-function UtilityStorage:get_silent_target()
-    local Distance, Player = Shiroku_Rewrite.Fov.Silent.Radius
-
-    for Index, Value in pairs(Players:GetPlayers()) do
-        if (Value == local_player) then continue end
-
-        local Character = Value.Character
-        local RootPart  = Character and Character:FindFirstChild('HumanoidRootPart')
-
-        if (not RootPart) then continue end
-
-        if not UtilityStorage:IsPlrAlive(Value) then
-            continue
-        end
-
-        if Shiroku_Rewrite['Silent'].Checks.KnockedCheck and Value.Character.BodyEffects['K.O'].Value == true then
-            continue
-        end
-
-        if Shiroku_Rewrite['Silent'].Checks.GrabbedCheck and Value.Character:FindFirstChild('GRABBING_CONSTRAINT') then
-            continue
-        end
-
-        if Shiroku_Rewrite['Silent'].Checks.VehicleCheck and Value.Character:FindFirstChild('[CarHitBox]') then
-            continue
-        end
-
-        if Shiroku_Rewrite['Silent'].Checks.CrewCheck and UtilityStorage:crew_check(Value) then
-            continue
-        end
-
-        if Shiroku_Rewrite['Silent'].Checks.HeldToolCheck and not local_player.Character:FindFirstChildWhichIsA('Tool') then
-            continue
-        end
-
-        local Position, OnScreen = workspace.CurrentCamera:WorldToViewportPoint(RootPart.Position)
-        local Magnitude = (Vector2.new(Position.X, Position.Y) - UtilityStorage:get_mouse_pos()).Magnitude
-
-        if Magnitude > Distance then continue end
-
-        if not OnScreen then continue end
-
-        if OnScreen then
-            Distance = Magnitude
-            Player = Value
-        end
-    end
-
-    return Player
-end
-
 
 
 local aimassist_fov = UtilityStorage:create_drawing('Circle', {
@@ -524,38 +368,14 @@ local aimassist_fov = UtilityStorage:create_drawing('Circle', {
     Filled = Shiroku_Rewrite.Fov.AimAssist.Filled,
 })
 
-local silent_fov = UtilityStorage:create_drawing('Circle', {
-    Visible = Shiroku_Rewrite.Fov.Silent.Visible,
-    Transparency = Shiroku_Rewrite.Fov.Silent.Transparency,
-    Thickness = Shiroku_Rewrite.Fov.Silent.Thickness,
-    Color = Shiroku_Rewrite.Fov.Silent.Color,
-    Radius =  Shiroku_Rewrite.Fov.Silent.Radius,
-    Filled = Shiroku_Rewrite.Fov.Silent.Filled,
-})
-
 local aimassist_tracer = UtilityStorage:create_drawing('Line', {
     Visible = Shiroku_Rewrite.Visualize.AimAssist.Tracer.Visible,
     Thickness = Shiroku_Rewrite.Visualize.AimAssist.Tracer.Thickness,
     Color = Shiroku_Rewrite.Visualize.AimAssist.Tracer.Color,
 })
 
-local silentaim_tracer = UtilityStorage:create_drawing('Line', {
-    Visible = Shiroku_Rewrite.Visualize.Silent.Tracer.Visible,
-    Thickness = Shiroku_Rewrite.Visualize.Silent.Tracer.Thickness,
-    Color = Shiroku_Rewrite.Visualize.Silent.Tracer.Color,
-})
-
-local paneltext = UtilityStorage:create_drawing('Text', {
-    Visible = Shiroku_Rewrite.Panel.Enabled,
-    Size = 15,
-    Outline = true,
-    OutlineColor = Color3.fromRGB(1, 1, 1),
-    Color = Color3.fromRGB(189, 172, 255),
-    Position = Shiroku_Rewrite.Panel.Position,
-})
 
 local aimassisthighlight = Instance.new("Highlight")
-local silentaimhighlight = Instance.new("Highlight")
 
 function UtilityStorage:FindTrueIndex(tbl)
     if tbl ~= nil then
@@ -631,18 +451,6 @@ function UtilityStorage:get_cam_prediction()
     return prediction
 end
 
-function UtilityStorage:get_silent_prediction()
-    local prediction
-    if silent_target then
-        if silent_target.Character:FindFirstChildOfClass('Humanoid'):GetState() == Enum.HumanoidStateType.Freefall then
-            prediction = Shiroku_Rewrite['Silent'].Prediction.Prediction_Y
-        else
-            prediction = Shiroku_Rewrite['Silent'].Prediction.Prediction_X
-        end
-    end
-    return prediction
-end
-
 function UtilityStorage:update_cam()
     if not aimassist_target then return end
     if not aimassist_targetting then return end
@@ -703,58 +511,6 @@ function UtilityStorage:update_cam()
     end
 end
 
-function UtilityStorage:initialize_silent()
-    if not silent_target then return end
-
-    local prediction = UtilityStorage:get_silent_prediction()
-
-    if game.PlaceId == 9825515356 then
-        if Shiroku_Rewrite['Silent'].Resolver.Enabled and silent_target and Shiroku_Rewrite['Silent'].Enabled then
-            if silent_target and Shiroku_Rewrite['Silent'].Enabled and Shiroku_Rewrite['Silent'].HitPart_Mode == 'Custom' then
-                game:GetService('ReplicatedStorage').MainEvent:FireServer(namecalltype, silent_target.Character.HumanoidRootPart.Position + (targetresolverpos * prediction) + Vector3.new(25, 100, 25))
-            elseif silent_target and Shiroku_Rewrite['Silent'].Enabled and Shiroku_Rewrite['Silent'].HitPart_Mode == 'Nearest Part' then
-                hitscanpart_silent = tostring(UtilityStorage:FindNearestPart(silent_target.Character, {Value = bones}))
-                game:GetService('ReplicatedStorage').MainEvent:FireServer(namecalltype, silent_target.Character[hitscanpart_silent].Position + (silent_target.Character[hitscanpart_silent][Shiroku_Rewrite['Silent'].Vel_Type] * prediction) + Vector3.new(25, 100, 25))
-            elseif silent_target and Shiroku_Rewrite['Silent'].Enabled and Shiroku_Rewrite['Silent'].HitPart_Mode == 'Nearest Point' then
-                hitscanpart_silent = tostring(UtilityStorage:FindNearestPart(silent_target.Character, {Value = bones}))
-                game:GetService('ReplicatedStorage').MainEvent:FireServer(namecalltype, UtilityStorage:GetClosestPoint(silent_target.Character[hitscanpart_silent])+(silent_target.Character[hitscanpart_silent][Shiroku_Rewrite['Silent'].Vel_Type]*prediction) + Vector3.new(25, 100, 25))
-            end
-        else
-            if silent_target and Shiroku_Rewrite['Silent'].Enabled and Shiroku_Rewrite['Silent'].HitPart_Mode == 'Custom' then
-                game:GetService('ReplicatedStorage').MainEvent:FireServer(namecalltype, silent_target.Character[Shiroku_Rewrite['Silent'].HitPart].Position + (silent_target.Character[Shiroku_Rewrite['Silent'].HitPart][Shiroku_Rewrite['Silent'].Vel_Type] * prediction) + Vector3.new(25, 100, 25))
-            elseif silent_target and Shiroku_Rewrite['Silent'].Enabled and Shiroku_Rewrite['Silent'].HitPart_Mode == 'Nearest Part' then
-                hitscanpart_silent = tostring(UtilityStorage:FindNearestPart(silent_target.Character, {Value = bones}))
-                game:GetService('ReplicatedStorage').MainEvent:FireServer(namecalltype, silent_target.Character[hitscanpart_silent].Position + (silent_target.Character[hitscanpart_silent][Shiroku_Rewrite['Silent'].Vel_Type] * prediction) + Vector3.new(25, 100, 25))
-            elseif silent_target and Shiroku_Rewrite['Silent'].Enabled and Shiroku_Rewrite['Silent'].HitPart_Mode == 'Nearest Point' then
-                hitscanpart_silent = tostring(UtilityStorage:FindNearestPart(silent_target.Character, {Value = bones}))
-                game:GetService('ReplicatedStorage').MainEvent:FireServer(namecalltype, UtilityStorage:GetClosestPoint(silent_target.Character[hitscanpart_silent])+(silent_target.Character[hitscanpart_silent][Shiroku_Rewrite['Silent'].Vel_Type]*prediction) + Vector3.new(25, 100, 25))
-            end
-        end
-    else
-        if Shiroku_Rewrite['Silent'].Resolver.Enabled and silent_target and Shiroku_Rewrite['Silent'].Enabled then
-            if silent_target and Shiroku_Rewrite['Silent'].Enabled and Shiroku_Rewrite['Silent'].HitPart_Mode == 'Custom' then
-                game:GetService('ReplicatedStorage').MainEvent:FireServer(namecalltype, silent_target.Character.HumanoidRootPart.Position + (targetresolverpos * prediction))
-            elseif silent_target and Shiroku_Rewrite['Silent'].Enabled and Shiroku_Rewrite['Silent'].HitPart_Mode == 'Nearest Part' then
-                hitscanpart_silent = tostring(UtilityStorage:FindNearestPart(silent_target.Character, {Value = bones}))
-                game:GetService('ReplicatedStorage').MainEvent:FireServer(namecalltype, silent_target.Character[hitscanpart_silent].Position + (silent_target.Character[hitscanpart_silent][Shiroku_Rewrite['Silent'].Vel_Type] * prediction))
-            elseif silent_target and Shiroku_Rewrite['Silent'].Enabled and Shiroku_Rewrite['Silent'].HitPart_Mode == 'Nearest Point' then
-                hitscanpart_silent = tostring(UtilityStorage:FindNearestPart(silent_target.Character, {Value = bones}))
-                game:GetService('ReplicatedStorage').MainEvent:FireServer(namecalltype, UtilityStorage:GetClosestPoint(silent_target.Character[hitscanpart_silent])+(silent_target.Character[hitscanpart_silent][Shiroku_Rewrite['Silent'].Vel_Type]*prediction))
-            end
-        else
-            if silent_target and Shiroku_Rewrite['Silent'].Enabled and Shiroku_Rewrite['Silent'].HitPart_Mode == 'Custom' then
-                game:GetService('ReplicatedStorage').MainEvent:FireServer(namecalltype, silent_target.Character[Shiroku_Rewrite['Silent'].HitPart].Position + (silent_target.Character[Shiroku_Rewrite['Silent'].HitPart][Shiroku_Rewrite['Silent'].Vel_Type] * prediction))
-            elseif silent_target and Shiroku_Rewrite['Silent'].Enabled and Shiroku_Rewrite['Silent'].HitPart_Mode == 'Nearest Part' then
-                hitscanpart_silent = tostring(UtilityStorage:FindNearestPart(silent_target.Character, {Value = bones}))
-                game:GetService('ReplicatedStorage').MainEvent:FireServer(namecalltype, silent_target.Character[hitscanpart_silent].Position + (silent_target.Character[hitscanpart_silent][Shiroku_Rewrite['Silent'].Vel_Type] * prediction))
-            elseif silent_target and Shiroku_Rewrite['Silent'].Enabled and Shiroku_Rewrite['Silent'].HitPart_Mode == 'Nearest Point' then
-                hitscanpart_silent = tostring(UtilityStorage:FindNearestPart(silent_target.Character, {Value = bones}))
-                game:GetService('ReplicatedStorage').MainEvent:FireServer(namecalltype, UtilityStorage:GetClosestPoint(silent_target.Character[hitscanpart_silent])+(silent_target.Character[hitscanpart_silent][Shiroku_Rewrite['Silent'].Vel_Type]*prediction))
-            end
-        end
-    end
-end
-
 function UtilityStorage:get_distance_from_plr(part)
     return (part.Position - workspace.CurrentCamera.CFrame.Position).Magnitude
 end
@@ -795,17 +551,7 @@ UtilityStorage:create_connection(RunService.RenderStepped, function(delta_time)
     aimassist_fov.Filled = Shiroku_Rewrite.Fov.AimAssist.Filled
     aimassist_fov.Thickness = Shiroku_Rewrite.Fov.AimAssist.Thickness
 
-    silent_fov.Position = mouse_pos
-    silent_fov.Visible = Shiroku_Rewrite.Fov.Silent.Visible
-    silent_fov.Radius = Shiroku_Rewrite.Fov.Silent.Radius
-    silent_fov.Color = Shiroku_Rewrite.Fov.Silent.Color
-    silent_fov.Transparency = Shiroku_Rewrite.Fov.Silent.Transparency
-    silent_fov.Filled = Shiroku_Rewrite.Fov.Silent.Filled
-    silent_fov.Thickness = Shiroku_Rewrite.Fov.Silent.Thickness
-
     UtilityStorage:update_cam()
-
-    silent_target = UtilityStorage:get_silent_target()
 
     if aimassist_target and aimassist_targetting then
         if Shiroku_Rewrite['Aim Assist'].Disable_White_Not_Holding_Gun then
@@ -821,47 +567,6 @@ UtilityStorage:create_connection(RunService.RenderStepped, function(delta_time)
                 aimassist_targetting = false
                 aimassist_target = nil
             end
-        end
-    end
-
-    -- panel
-    if Shiroku_Rewrite.Panel.Enabled and silent_target then
-        pcall(function()
-                    
-        local info_table = {
-            "Player Data:",
-            "Name: "..silent_target.DisplayName .. "("..silent_target.Name .. ")",
-            "Health: "..math.round(silent_target.Character.Humanoid.Health),
-            "Distance: "..tostring(math.floor(UtilityStorage:get_distance_from_plr(silent_target.Character.HumanoidRootPart))),
-            "Tool: "..UtilityStorage:get_nameof_tool(silent_target) .. " (Ammo: "..UtilityStorage:get_ammo_of_tool(silent_target) .. ")",
-            "Priorities: ".. "{Knocked: " .. tostring(silent_target.Character.BodyEffects['K.O'].Value) .. "}"
-        }
-
-        paneltext.Visible = true
-        paneltext.Font = 41
-        paneltext.Text = table.concat(info_table, "\n")
-        end)
-    elseif Shiroku_Rewrite.Panel.Enabled and not silent_target then
-        local infotable = {
-            "Player Data:",
-            "Name: nil"
-        }
-
-        paneltext.Visible = true
-        paneltext.Text = table.concat(infotable, "\n")
-    else
-        paneltext.Visible = false
-        paneltext.Text = ""
-    end
-    -- panel
-
-    if Shiroku_Rewrite.Silent.Anti_Curve.Enabled and silent_target and Shiroku_Rewrite.Silent.Enabled then
-        if Shiroku_Rewrite.Silent.Anti_Curve.CheckIfStanding then
-            if game.Players.LocalPlayer.Character.Humanoid.MoveDirection.Magnitude > 0 then
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.Position, Vector3.new(silent_target.Character.HumanoidRootPart.CFrame.X, game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.Position.Y, silent_target.Character.HumanoidRootPart.CFrame.Z))
-            end
-        else
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.Position, Vector3.new(silent_target.Character.HumanoidRootPart.CFrame.X, game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.Position.Y, silent_target.Character.HumanoidRootPart.CFrame.Z))
         end
     end
 
@@ -896,58 +601,6 @@ UtilityStorage:create_connection(RunService.RenderStepped, function(delta_time)
     else
         aimassist_tracer.Visible = false
     end
-
-    if Shiroku_Rewrite.Visualize.Silent.Tracer.Enabled and Shiroku_Rewrite.Silent.Enabled then
-        if silent_target then
-            local pos = current_camera:WorldToViewportPoint(silent_target.Character[Shiroku_Rewrite['Silent'].HitPart].Position)            
-            
-            silentaim_tracer.From = mouse_pos
-            silentaim_tracer.To = Vector2.new(pos.X, pos.Y)
-            silentaim_tracer.Visible = true
-            silentaim_tracer.Color = Shiroku_Rewrite.Visualize.Silent.Tracer.Color
-        else
-            silentaim_tracer.Visible = false
-        end
-    else
-        silentaim_tracer.Visible = false
-    end
-
-    if Shiroku_Rewrite.Visualize.Silent.Highlight.Enabled and Shiroku_Rewrite.Silent.Enabled then
-        if silent_target then
-            silentaimhighlight.Name = "silentaimhighlight"
-            silentaimhighlight.Enabled = true
-            silentaimhighlight.Parent = silent_target.Character
-            silentaimhighlight.FillColor = Shiroku_Rewrite.Visualize.Silent.Highlight.FillColor
-            silentaimhighlight.OutlineColor = Shiroku_Rewrite.Visualize.Silent.Highlight.OutlineColor
-            silentaimhighlight.DepthMode = Enum.HighlightDepthMode.Occluded
-            silentaimhighlight.FillTransparency = Shiroku_Rewrite.Visualize.Silent.Highlight.FillTransparency
-            silentaimhighlight.OutlineTransparency = Shiroku_Rewrite.Visualize.Silent.Highlight.OutlineTransparency
-        else
-            silentaimhighlight.Enabled = false
-        end
-    else
-        silentaimhighlight.Enabled = false
-    end
-
-    if silent_target and Shiroku_Rewrite['Silent'].Enabled then
-        if Shiroku_Rewrite['Silent'].Checks.NoGroundShots then
-            if silent_target.Character[Shiroku_Rewrite['Silent'].HitPart].Velocity.Y < -20 then
-                pcall(function()
-                    local part = silent_target.Character[Shiroku_Rewrite['Silent'].HitPart]
-                    part.Velocity = Vector3.new(part.Velocity.X, math.clamp(part.Velocity.Y, 0, 9e9), part.Velocity.Z)
-                end)
-            end
-        end
-    end
-end)
-
-UtilityStorage:create_connection(RunService.Heartbeat, function(delta_time)
-    if Shiroku_Rewrite['Silent'].Resolver.Enabled and silent_target and Shiroku_Rewrite['Silent'].Enabled then
-        targetresolverpos = UtilityStorage:recalculate_velocity(silent_target)
-    end
-    if Shiroku_Rewrite['Aim Assist'].Resolver.Enabled and aimassist_target and Shiroku_Rewrite['Aim Assist'].Enabled then
-        aimassistresolverpos = UtilityStorage:recalculate_velocity(aimassist_target)
-    end
 end)
 
 -- aim assist hook
@@ -968,46 +621,6 @@ UtilityStorage:create_connection(game:GetService("UserInputService").InputBegan,
     end
 end)
 -- aim assist hook
-
--- silent hook
-
-game.Players.LocalPlayer.Character.ChildAdded:Connect(function(tool)
-    if tool:IsA('Tool') then 
-        tool.Activated:Connect(function()
-            if silent_target ~= nil and Shiroku_Rewrite['Silent'].Enabled and UtilityStorage:Chance(Shiroku_Rewrite['Silent'].HitChance, 100) and Shiroku_Rewrite['Silent'].Mode == 'FOV' then
-                UtilityStorage:initialize_silent()
-            elseif silent_target ~= nil and Shiroku_Rewrite['Silent'].Enabled and UtilityStorage:Chance(Shiroku_Rewrite['Silent'].HitChance, 100) and Shiroku_Rewrite['Silent'].Mode == 'Target' then
-                if aimassist_target and aimassist_targetting then
-                    silent_target = aimassist_target
-                    UtilityStorage:initialize_silent()
-                end
-            end
-        end)
-    end
-end)
-
-game:GetService('Players').LocalPlayer.CharacterAdded:Connect(function(char)
-    char.ChildAdded:Connect(function(tool)
-        tool.Activated:connect(function()
-            if silent_target ~= nil and Shiroku_Rewrite['Silent'].Enabled and UtilityStorage:Chance(Shiroku_Rewrite['Silent'].HitChance, 100) and Shiroku_Rewrite['Silent'].Mode == 'FOV' then
-                UtilityStorage:initialize_silent()
-            elseif silent_target ~= nil and Shiroku_Rewrite['Silent'].Enabled and UtilityStorage:Chance(Shiroku_Rewrite['Silent'].HitChance, 100) and Shiroku_Rewrite['Silent'].Mode == 'Target' then
-                if aimassist_target and aimassist_targetting then
-                    silent_target = aimassist_target
-                    UtilityStorage:initialize_silent()
-                end
-            end
-        end)
-    end)
-end)
-
-game:GetService('RunService').Heartbeat:Connect(function()
-        if local_player.Character:FindFirstChildWhichIsA("Tool") and Shiroku_Rewrite['Silent'].SpamGuns then
-            if local_player.Character:FindFirstChildWhichIsA("Tool").Ammo then
-                UtilityStorage:initialize_silent()
-            end
-        end
-end)
 
 -- // UI Library // --
 local Settings = {
@@ -3758,7 +3371,6 @@ local aimbot_visualizer = Menu.Container("Main", "Visuals ", "Left")
 local cont = Menu.Container("Main", "Esp", "Right")
 -- settings section
 local cont = Menu.Container("Settings", "Menu", "Left")
-local cont = Menu.Container("Settings", "Player List", "Right")
 --
 
 -- aim assist
@@ -3849,11 +3461,6 @@ Menu.ColorPicker("Main", "Esp", "Friendly Color", config.Misc.Teamcheck.friendly
 Menu.Hotkey("Settings", "Menu", "Close/Open", settings.Bind, function(v) settings.Bind = v end, "Tooltip")
 Menu.ColorPicker("Settings", "Menu", "Accent", Menu.Accent, 1, function(v) Menu.Accent = v end, "Tooltip")
 Menu.CheckBox("Settings", "Menu", "Watermark", Watermark:SetVisible(), function(v) Watermark:SetVisible(v) end, "Tooltip")
-
--- player list (settings)
-Menu.ListBox("Settings", "Player List", "List box", false, get_players(), function(v) getgenv().Selected_Player = v end)
-Menu.Button("Settings", "Player List", "Go-To", function(v) teleport(getgenv().Selected_Player) end, "")
-Menu.Label("Settings", "Player List", "Player-List Doesnt Update")
 
 --
 Menu:SetVisible(true)
