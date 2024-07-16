@@ -184,7 +184,7 @@ function funcs:Beam(v1, v2)
     Beam.LightInfluence = 1
     Beam.Width0 = Settings.StartWidth
     Beam.Width1 = Settings.EndWidth
-    Beam.Texture = "http://www.roblox.com/asset/?id=9150663556"
+    Beam.Texture = "http://www.roblox.com/asset/?id=1215691065"
     Beam.TextureSpeed = 2
     Beam.TextureLength = 1
     delay(Settings.Time, function()
@@ -4425,7 +4425,7 @@ Menu.Label("Misc", "Movement", "--------------------------------")
 
 Menu.CheckBox("Misc", "Movement", "Bunny Hop", Movement.BunnyHop, function(v) Movement.BunnyHop = v end, "Tooltip")
 Menu.CheckBox("Misc", "Movement", "Auto Jump", Movement.AutoJump, function(v) Movement.AutoJump = v end, "Tooltip")
-Menu.Slider("Misc", "Movement", "Speed", 0, 500, Movement.HopAmount, "", 1, function(v) Movement.HopAmount = v end, "Tooltip")
+Menu.Slider("Misc", "Movement", "Speed", 0, 5, Movement.HopAmount, "", 1, function(v) Movement.HopAmount = v end, "Tooltip")
 
 -- player (misc)
 Menu.CheckBox("Misc", "Player", "No Jump Cooldown", Utilities.NoJumpCooldown, function(v) Utilities.NoJumpCooldown = v end, "Tooltip")
