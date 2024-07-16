@@ -22,7 +22,6 @@ local config = {
     Tracer = {
         enabled = false,
         color = Color3.fromRGB(244, 244, 244),
-        thickness = 1,
     },
     Box = {
         enabled = false,
@@ -3677,11 +3676,21 @@ local layouttracer = 'bottom'
 
 local function upd_esp(v)
     local line = Drawing.new("Line")
-    line.Thickness = config.Tracer.thickness
+    line.Thickness = 1
+    line.Color = Color3.fromRGB(244, 244, 244)
+    line.ZIndex = 500
+    local lineoutlinetracer = Drawing.new("Line")
+    lineoutlinetracer.Thickness = 1.75
+    lineoutlinetracer.Color = Color3.fromRGB(1, 1, 1)
+    lineoutlinetracer.ZIndex = 499
+
     local box = Drawing.new("Square")
     local boxoutline = Drawing.new("Square")
+
     local highlight = Instance.new('Highlight')
+
     local nametag = Drawing.new("Text")
+
     local healthbar = storage:create_drawing('Square', {
         Filled = true,
         Thickness = 1,
@@ -3695,9 +3704,7 @@ local function upd_esp(v)
     local function intialize_esp()
         local connection
         connection = rs.Heartbeat:Connect(function ()
-
             if v.Character ~= nil and v.Character:FindFirstChild("Humanoid") ~= nil and v.Character:FindFirstChild("HumanoidRootPart") ~= nil and v.Character.Humanoid.Health > 0 and v.Character:FindFirstChild("Head") ~= nil then
-
                 local pos, onscreen = workspace.CurrentCamera:WorldToViewportPoint(v.Character.LowerTorso.Position)
 
                 if onscreen then
@@ -3767,10 +3774,33 @@ local function upd_esp(v)
 
                         if config.Tracer.enabled then
                             line.Visible = true
-                            line.From = Vector2.new(game:GetService("UserInputService"):GetMouseLocation().X, game:GetService("UserInputService"):GetMouseLocation().Y)
-                            line.To = Vector2.new(pos.X, pos.Y)
+                            lineoutlinetracer.Visible = true
+                            line.Thickness = 1
+                            lineoutlinetracer.Thickness = 3
+    
+                            if layouttext then
+                                line.To = vector2_floor(check_data.position - size / 2) + (Vector2.new(size.X / 2, size.Y + 0 + 2)) 
+                                line.From = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y)
+    
+                                lineoutlinetracer.To = vector2_floor(check_data.position - size / 2) + (Vector2.new(size.X / 2, size.Y + 0 + 2)) 
+                                lineoutlinetracer.From = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y)
+                            else
+                                line.To = vector2_floor(check_data.position - size / 2) + (Vector2.new(size.X / 2, size.Y + 0 + 2)) 
+                                line.From = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y)
+    
+                                lineoutlinetracer.To = vector2_floor(check_data.position - size / 2) + (Vector2.new(size.X / 2, size.Y + 0 + 2)) 
+                                lineoutlinetracer.From = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y)
+                            end
                         else
                             line.Visible = false
+                            lineoutlinetracer.Visible = false
+                            line.To = Vector2.new(0,02)
+                            line.From = Vector2.new(0,02)
+
+                            lineoutlinetracer.To = Vector2.new(0,02)
+                            lineoutlinetracer.From = Vector2.new(0,02)
+                            line.Thickness = 0
+                            lineoutlinetracer.Thickness = 0
                         end
 
                         if config.Box.enabled then
@@ -3778,10 +3808,11 @@ local function upd_esp(v)
                             box.Size = size
                             box.Position = position
                             box.ZIndex = 500
+                            box.Thickness = 1
         
                             boxoutline.Visible = true
                             boxoutline.Size = size
-                            boxoutline.Thickness = 1.7
+                            boxoutline.Thickness = 2
                             boxoutline.Position = position
                             boxoutline.Color = Color3.fromRGB(1, 1, 1)
                             boxoutline.ZIndex = 499
@@ -3837,6 +3868,8 @@ local function upd_esp(v)
                     healthbar.Visible = false
                     healthbaroutline.Visible = false
                     nametag.Visible = false
+                    lineoutlinetracer.Visible = false
+                    boxinline.Visible = false
                 end
             else
                 box.Visible = false
@@ -3846,6 +3879,8 @@ local function upd_esp(v)
                 healthbar.Visible = false
                 healthbaroutline.Visible = false
                 nametag.Visible = false
+                lineoutlinetracer.Visible = false
+                boxinline.Visible = false
                 if v.Name == nil then
                     connection:Disconnect()
                 end
