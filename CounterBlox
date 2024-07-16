@@ -3859,6 +3859,16 @@ local function upd_esp(v)
                         else
                             highlight.Enabled = false
                         end
+                    else
+                        box.Visible = false
+                        boxoutline.Visible = false
+                        line.Visible = false
+                        highlight.Enabled = false
+                        healthbar.Visible = false
+                        healthbaroutline.Visible = false
+                        nametag.Visible = false
+                        lineoutlinetracer.Visible = false
+                        boxinline.Visible = false
                     end
                 else
                     box.Visible = false
